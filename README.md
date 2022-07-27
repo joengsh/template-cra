@@ -44,3 +44,102 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+## setup
+
+### eslint & prettier
+
+cra default support eslint. All we need to do is to add custom extends and rules.
+
+```bash
+yarn add -D eslint-config-prettier eslint-plugin-prettier prettier @joengsh/eslint-config-react @joengsh/prettier-config
+```
+
+```javascript
+// .prettierrc
+'@joengsh/prettier-config';
+
+// package.json or .eslintrc.js
+module.exports = {
+  extends: ['@joengsh/eslint-config-react/cra'],
+};
+```
+
+### lint-staged and husky
+
+```bash
+yarn add -D husky lint-staged
+```
+
+Add lint-staged config
+
+```json
+{
+  /*...*/
+  "scripts": {
+    "prepare": "husky install",
+    "lint-staged": "lint-staged",
+    "format": "prettier --write src/**/*.ts{,x} src/*.ts{,x}",
+    "lint": "eslint src/**/*.ts{,x} src/*.ts{,x}",
+    "lint-fix": "eslint --fix src/**/*.ts{,x} src/*.ts{,x}"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,css,json,md,mdx}": ["prettier --write", "git add"],
+    "*.{js,jsx,ts,tsx}": ["eslint --fix", "git add"]
+  }
+  /*...*/
+}
+```
+
+Add pre-commit hook
+
+```bash
+npx husky add .husky/pre-commit "yarn lint-staged"
+```
+
+### storybook
+
+**downgrade to react 17**
+
+since storybook not fully support react 18, so we need to downgrade to react 17 first. We can manually change the version number in package.json and force install again.
+
+```json
+{
+  // suggested version
+  "dependencies": {
+    "@testing-library/react": "^12.1.5",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  }
+}
+```
+
+```bash
+yarn install --force
+```
+
+Then we need to update index.tsx
+
+```typescript
+// import ReactDOM from 'react-dom/client';
+
+// const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+// root.render(
+//   <React.StrictMode>
+//     <App />
+//   </React.StrictMode>
+// );
+
+import ReactDOM from 'react-dom';
+
+const rootNode = document.getElementById('root');
+ReactDOM.render(<App />, rootNode);
+```
+
+**install storybook**
+
+```bash
+npx storybook init
+```
